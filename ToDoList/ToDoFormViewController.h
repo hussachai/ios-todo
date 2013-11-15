@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  ToDoFormViewController.h
 //  ToDoList
 //
 //  Created by Hussachai Puripunpinyo on 11/14/13.
@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "WebServiceCallHandler.h"
 
-@interface ViewController : UIViewController
+@interface ToDoFormViewController : UIViewController <WebServiceCallHandler>
 
 @end
