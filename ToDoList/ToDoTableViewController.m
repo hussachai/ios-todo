@@ -19,6 +19,7 @@
 @implementation ToDoTableViewController
 {
     WebServiceClient *client;
+    dispatch_queue_t deleteQueue;
 }
 
 - (id)initWithStyle:(UITableViewStyle)style {
@@ -44,6 +45,8 @@
     client = [[WebServiceClient alloc] init];
     client.delegate = self;
     [client loadTasks];
+    
+    deleteQueue = dispatch_queue_create("Delete Queue", NULL);
     
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
@@ -97,14 +100,19 @@
 
 - (void) motionEnded: (UIEventSubtype)motion withEvent:(UIEvent *)event{
     if(motion == UIEventSubtypeMotionShake){
-        for(int i=0; i< self.taskList.count; i++){
-            Task *task = [self.taskList objectAtIndex:i];
-            if(task.completed){
-                [client deleteTask:task.taskId];
-                [self.taskList removeObjectAtIndex:i];
+        dispatch_async(deleteQueue, ^{
+            for(int i=0; i< self.taskList.count; i++){
+                Task *task = [self.taskList objectAtIndex:i];
+                if(task.completed){
+                    NSLog(@"Deleting task at index: %i", i);
+                    [client deleteTask:task.taskId];
+                    [self.taskList removeObjectAtIndex:i];
+                }
             }
-        }
-        [self.tableView reloadData];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.tableView reloadData];
+            });
+        });
     }
 }
 
